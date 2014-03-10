@@ -1,0 +1,31 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function chullpa_menu() {
+
+  $items = array();
+
+  return $items;
+}
+
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function chullpa_form_project_node_form_alter(&$form, &$form_state, $form_id) {
+
+ $form['actions']['submit']['#submit'][] = 'project_node_form_chullpa_submit';
+}
+
+
+function project_node_form_chullpa_submit($form, &$form_state) {
+  module_load_include('php', 'chullpa', 'inc/Deploy');
+  $node = $form_state['node'];
+  $title = $node->title;
+  $name = array('xxx', $title);
+  Deploy::deployDrupal($name);
+}
+  
+
