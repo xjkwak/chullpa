@@ -71,9 +71,9 @@
     <?php if ($site_name): ?><h1 id="site-title"><a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>"><?php print $site_name; ?></a></h1><?php endif; ?>
     <?php if ($site_slogan): ?><div id="site-description"><?php print $site_slogan; ?></div><?php endif; ?>
     <div class="clear"></div>
-	<?php 
+	<?php
 		/* Disable Main menu if unchecked */
-		if ($main_menu == TRUE): 
+		if ($main_menu == TRUE):
 	?>
     <nav id="main-menu"  role="navigation">
       <a class="nav-toggle" href="#"><?php print t("Navigation"); ?></a>
@@ -264,9 +264,13 @@
 
     <div id="copyright">
     <!--Remove  -->
-    <?php if (!theme_get_setting('remove_copywrite')): ?>
-      <p class="copyright"><?php print t('Copyright'); ?> &copy; <?php echo date("Y"); ?>, <?php print theme_get_setting('copywrite_holder') ?></p>
-    <?php endif; ?>
+    <?php if (!theme_get_setting('remove_copyright')){ ?>
+    <?php if (!theme_get_setting('copyright_override')){?>
+      <p class="copyright"><?php print t('Copyright'); ?> &copy; <?php echo date("Y"); ?>, <?php print check_plain(theme_get_setting('copywrite_holder')) ?></p>
+    <?php } else {?>
+       <?php echo check_plain(theme_get_setting('copyright_override'));?>
+    <?php } ?>
+    <?php } ?>
     <!--Remove Theme Credit by Setting -->
     <?php if (!theme_get_setting('display_theme_credit')): ?>
       <p class="credits"> <?php print t('Theme Originally Created by'); ?>  <a href="http://www.devsaran.com">Devsaran</a></p>

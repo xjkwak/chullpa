@@ -109,7 +109,4 @@ function professional_theme_preprocess_node(&$variables) {
   }
 }
 
-function professional_theme_preprocess_maintenance_page__offline(&$variables) {
-  print "entra :D";
 
-}

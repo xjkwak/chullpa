@@ -27,23 +27,29 @@ function professional_theme_form_system_theme_settings_alter(&$form, &$form_stat
     '#default_value' => theme_get_setting('display_theme_credit'),
     '#description' => t("check this option to remove the theme credit from the footer"),
   );
-  $form['prof_settings']['copywrite_information'] = array(
+  $form['prof_settings']['copyright_information'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Copywrite Information'),
+    '#title' => t('Copyright Information'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
-  $form['prof_settings']['copywrite_information']['remove_copywrite'] = array(
+  $form['prof_settings']['copyright_information']['remove_copyright'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Remove Copywrite from the footer'),
-    '#default_value' => theme_get_setting('remove_copywrite'),
-    '#description' => t("check this option to remove the copywrite information from the footer"),
+    '#title' => t('Remove copyright from the footer'),
+    '#default_value' => theme_get_setting('remove_copyright'),
+    '#description' => t("check this option to remove the copyright information from the footer"),
   );
-  $form['prof_settings']['copywrite_information']['copywrite_holder'] = array(
+  $form['prof_settings']['copyright_information']['copyright_override'] = array(
     '#type' => 'textfield',
-    '#title' => t('Copywrite Holder'),
-    '#default_value' => theme_get_setting('copywrite_holder'),
-    '#description' => 'Name the Copywrite holder of the site that will be displayed in the footer',
+    '#title' => t('Copyright Override'),
+    '#default_value' => theme_get_setting('copyright_override'),
+    '#description' => 'override the entire copyright line',
+  );
+  $form['prof_settings']['copyright_information']['copyright_holder'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Copyright Holder'),
+    '#default_value' => theme_get_setting('copyright_holder'),
+    '#description' => 'Name the copyright holder of the site that will be displayed in the footer',
   );
   $form['prof_settings']['slideshow'] = array(
     '#type' => 'fieldset',
