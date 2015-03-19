@@ -15,7 +15,6 @@ function chullpa_menu() {
  * Implements hook_form_FORM_ID_alter().
  */
 function chullpa_form_project_node_form_alter(&$form, &$form_state, $form_id) {
-
  $form['actions']['submit']['#submit'][] = 'project_node_form_chullpa_submit';
 }
 
@@ -24,8 +23,24 @@ function project_node_form_chullpa_submit($form, &$form_state) {
   module_load_include('php', 'chullpa', 'inc/Deploy');
   $node = $form_state['node'];
   $title = $node->title;
-  $name = array('xxx', $title);
-  Deploy::deployDrupal($name);
-}
-  
+  $name = strtolower($title);
+  //$name = array('xxx', $title);
+//  Deploy::deployDrupal($name);
+  $output = array();
+  exec('bash +x /home/dries/public_html/sites/all/modules/custom/chullpa/inc/deploy.sh ' . $name, $output);
 
+
+  drupal_set_message(print_r($output, TRUE));
+}
+ 
+function chullpa_form_node_delete_confirm_alter(&$form, &$form_state, $form_id) {
+  $form['#submit'][] = 'project_node_form_chullpa_delete';
+}
+
+function project_node_form_chullpa_delete($form, &$form_state) {
+  $project = $form['#node'];
+  $name = strtolower($project->title);
+  module_load_include('php', 'chullpa', 'inc/Deploy');
+  Deploy::deleteProject($name);
+}
+ 

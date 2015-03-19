@@ -1,57 +1,81 @@
 <?php
 
 define ('MIN_PROJECT_NAME', 2);
-define ('DEFAULT_PROJECT_FOLDER', '/home/dries/projects/');
-define ('ALIASES_PATH', '/home/dries/.drush/');
-define ('ALIASES_FILE', '/home/dries/.drush/aliases.drushrc.php');
+define ('DEFAULT_HOME_USER', '/home/dries/');
+define ('DEFAULT_PROJECT_FOLDER', DEFAULT_HOME_USER . 'projects/');
+define ('ALIASES_PATH', DEFAULT_HOME_USER . '.drush/');
+define ('ALIASES_FILE', ALIASES_PATH . 'aliases.drushrc.php');
+define ('DEFAULT_DRUPAL_INSTANCE', DEFAULT_HOME_USER . 'drupal-7.26/');
+define ('DEFAULT_DRUPAL_INSTANCE_TAR', DEFAULT_HOME_USER . 'drupal-7.26.tar.gz');
 
 class Deploy {
 
   public function deployDrupal($args) {
-    //$name = $argv[1];
-    //exec('mkdir -p ~/projects/lost5');
-    //exec('drush dl');
     print_r($args);
     $nameProject = self::getProjectName($args);
     if (self::isValid($nameProject)) {
-      self::deployProject($nameProject);
+      $modules = self::getModulesToInstall($args);
+      self::deployProject($nameProject, $modules);
     }
   }
 
-  public function deployProject($name) {
+  public function deployProject($name, $modules) {
     $folder = self::createMainFolder($name);
-    self::downloadDrupal($folder);
-    self::createAlias($folder, $name);
+    self::downloadDrupal($folder, $name);
+    //self::copyDrupal($folder, $name);
+    //self::createAlias($folder, $name);
     self::installDrupal($folder, $name);
-    self::createSymbolicLink($folder,$name);
+    self::installModules($name, $modules);
+    $modules = 'toolbar overlay';
+    self::uninstallModules($name, $modules);
+    self::updateHtaccess($folder, $name);
   }
 
-  public function createAlias($folder, $name) {
-    chdir($folder . '/drupal');
-    exec('drush sa @self --full --with-optional >> '.ALIASES_FILE);
-    chdir(ALIASES_PATH);
-    exec('sed -i s/self/' . $name . '/g aliases.drushrc.php');
+  public function deleteProject($name) {
+    exec('chmod -R 777 ' . DEFAULT_PROJECT_FOLDER . $name);
+    exec('rm -rf ' . DEFAULT_PROJECT_FOLDER . $name);
+    exec('mysql -udrupal -pdrupal -e "drop database ' . $name . ';"');
   }
 
-  public function downloadDrupal($path) {
-    exec('drush dl --destination='.$path.' --drupal-project-rename=drupal');
+  public function getModulesToInstall($args) {
+    return "admin_menu views devel module_filter";
+
+  }
+  
+
+  public function installModules($name, $modules) {
+    chdir(DEFAULT_PROJECT_FOLDER . $name);
+    exec('drush dl admin_menu ctools views devel pathauto && drush en admin_menu_toolbar views_ui devel pathauto -y ');
   }
 
-  public function createSymbolicLink($folder, $name) {
-    $origin = $folder . '/drupal';
-    $destiny = '/var/www/html/drupal/' . $name;
-    exec('ln -s ' . $origin . ' ' . $destiny);
-    print 'Your new installation is available in http://108.174.62.233/drupal/' . $name;
+  public function uninstallModules($name, $modules) {
+    chdir(DEFAULT_PROJECT_FOLDER . $name);
+    exec('drush dis ' . $modules . ' -y');
   }
+
+  public function updateHtaccess($folder, $name) {
+    chdir($folder . $name);
+    exec('sed -i s/"# RewriteBase"/"  RewriteBase"/g .htaccess');
+  }
+
+  public function downloadDrupal($path, $name) {
+    exec('drush dl --destination=' . $path . ' --drupal-project-rename=' . $name);
+  } 
+
+  public function copyDrupal($path, $name) {
+    exec('cp -r ' . DEFAULT_DRUPAL_INSTANCE_TAR . ' ' . DEFAULT_PROJECT_FOLDER);
+    chdir(DEFAULT_PROJECT_FOLDER);
+    exec('tar xvfz drupal-7.26.tar.gz && mv drupal-7.26 '.$name);
+  } 
 
   public function installDrupal($folder, $name) {
-    chdir($folder . '/drupal');
-    exec('drush si --account-pass="717717" --db-url=mysql://drupal:drupal@localhost/' . $name .' -y');
+    chdir($folder . $name);
+    exec('drush si --account-pass="717717" --site-name="'.$name.'" --db-url=mysql://drupal:drupal@localhost/' . $name .' -y');
   }
 
   public function createMainFolder($name) {
-    $folder = DEFAULT_PROJECT_FOLDER.$name.'/web';
-    exec('mkdir -p '.$folder);
+    $folder = DEFAULT_PROJECT_FOLDER;
+    //exec('mkdir -p '.$folder);
     return $folder;
   }
  
@@ -84,9 +108,12 @@ class Deploy {
     return $nameProject;
   }
 
-}
+  public function execute() {
+   $output = array();
+   exec('bash +x /home/dries/public_html/sites/all/modules/custom/chullpa/inc/deploy.sh', $output);
+   return $output;
+  }
 
-//Deploy::deployDrupal($argv);
-//Deploy::getListProjectsName();
+}
 
 ?>
